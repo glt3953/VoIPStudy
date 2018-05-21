@@ -7,8 +7,10 @@
 //
 
 #import "AppDelegate.h"
+// Link to the PushKit framework
+#import <PushKit/PushKit.h>
 
-@interface AppDelegate ()
+@interface AppDelegate () <PKPushRegistryDelegate>
 
 @end
 
@@ -17,9 +19,23 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    // Trigger VoIP registration on launch
+    [self voipRegistration];
+    
     return YES;
 }
 
+// Register for VoIP notifications
+- (void)voipRegistration {
+    dispatch_queue_t mainQueue = dispatch_get_main_queue();
+    // Create a push registry object
+    PKPushRegistry *voipRegistry = [[PKPushRegistry alloc] initWithQueue: mainQueue];
+    // Set the registry's delegate to self
+    voipRegistry.delegate = self;
+    // Set the push type to VoIP
+    voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
+}
 
 - (void)applicationWillResignActive:(UIApplication *)application {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -47,5 +63,17 @@
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 
+
+#pragma mark - PKPushRegistryDelegate
+// Handle updated push credentials
+- (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type {
+    // Register VoIP push token (a property of PKPushCredentials) with server
+}
+
+
+// Handle incoming pushes
+- (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
+    // Process the received push
+}
 
 @end
